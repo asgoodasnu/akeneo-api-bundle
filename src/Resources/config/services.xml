@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+        http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <service
+                id="asgoodasnew_akeneo_api.akeneo_api"
+                class="Asgoodasnew\AkeneoApiBundle\AkeneoApi"
+        />
+
+        <service
+                alias="asgoodasnew_akeneo_api.symfony_http_client_akeneo_api"
+                id="Asgoodasnew\AkeneoApiBundle\AkeneoApi"
+        />
+
+        <service
+                id="asgoodasnew_akeneo_api.symfony_http_client_akeneo_api"
+                class="Asgoodasnew\AkeneoApiBundle\SymfonyHttpClientAkeneoApi"
+        >
+            <argument type="string"/>
+            <argument type="service" id="Symfony\Contracts\HttpClient\HttpClientInterface"/>
+            <argument type="service" id="asgoodasnew_akeneo_api.akeneo_api_authenticator"/>
+        </service>
+
+        <service
+                id="asgoodasnew_akeneo_api.akeneo_api_authenticator"
+                class="Asgoodasnew\AkeneoApiBundle\AkeneoApiAuthenticator"
+        >
+            <argument type="string"/>
+            <argument type="string"/>
+            <argument type="string"/>
+            <argument type="string"/>
+            <argument type="service" id="Symfony\Contracts\HttpClient\HttpClientInterface"/>
+        </service>
+
+<!--        <service-->
+<!--                id="asgoodasnew_akeneo_api.cached_symfony_http_client_akeneo_api"-->
+<!--                class="Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi"-->
+<!--                decorates="asgoodasnew_akeneo_api.symfony_http_client_akeneo_api"-->
+<!--        >-->
+<!--            <argument type="service" id="asgoodasnew_akeneo_api.cached_symfony_http_client_akeneo_api.inner"/>-->
+<!--            <argument type="service" id="Psr\Cache\CacheItemPoolInterface"/>-->
+<!--        </service>-->
+
+    </services>
+</container>
