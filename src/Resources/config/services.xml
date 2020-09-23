@@ -13,6 +13,7 @@
         <service
                 alias="asgoodasnew_akeneo_api.symfony_http_client_akeneo_api"
                 id="Asgoodasnew\AkeneoApiBundle\AkeneoApi"
+                public="true"
         />
 
         <service
