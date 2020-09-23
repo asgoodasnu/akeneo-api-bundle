@@ -1,0 +1,27 @@
+{
+    "name": "asgoodasnu/akeneo-api-bundle",
+    "description": "Akeneo API client",
+    "type": "symfony-bundle",
+    "authors": [
+        {
+            "name": "Oliver Pintat",
+            "email": "oliver.pintat@asgoodasnew.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Asgoodasnew\\AkeneoApiBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Asgoodasnew\\AkeneoApiBundle\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "symfony/phpunit-bridge": "^5.1"
+    }
+}
