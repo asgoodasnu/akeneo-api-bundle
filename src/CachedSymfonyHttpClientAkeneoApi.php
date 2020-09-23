@@ -9,6 +9,8 @@ use Psr\Cache\CacheItemPoolInterface;
 
 class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
 {
+    const A_HOUR = 3600;
+
     private AkeneoApi $decorated;
     private CacheItemPoolInterface $cache;
 
@@ -38,7 +40,7 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
      */
     private function saveToCache(CacheItemInterface $cacheItem, array $productArray): void
     {
-        $cacheItem->expiresAfter(3600);
+        $cacheItem->expiresAfter(self::A_HOUR);
         $cacheItem->set($productArray);
         $this->cache->save($cacheItem);
     }
