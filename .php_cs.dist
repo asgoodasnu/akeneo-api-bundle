@@ -1,0 +1,25 @@
+<?php
+$finder = PhpCsFixer\Finder::create()
+    ->in('src')
+    ->in('tests')
+    ->notPath('src/Migrations/migration.tpl')
+;
+return PhpCsFixer\Config::create()
+    ->setRiskyAllowed(true)
+    ->setRules([
+        '@Symfony' => true,
+        'ordered_imports' => true,
+        'no_unused_imports' => true,
+        'psr4' => true,
+        'psr0' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'no_superfluous_phpdoc_tags' => true,
+        'linebreak_after_opening_tag' => true,
+        'logical_operators' => true,
+        'native_function_invocation' => [
+            'include' => ['@compiler_optimized'],
+            'scope' => 'namespaced'
+        ]
+    ])
+    ->setFinder($finder)
+;
