@@ -5,7 +5,7 @@ Add this to composer.json
 "repositories": [
     {
       "type": "vcs",
-      "url": "git@github.com:asgoodasnu/akene-api-bundle.git"
+      "url": "git@github.com:asgoodasnu/akeneo-api-bundle.git"
     }
   ]
 ```
@@ -16,7 +16,7 @@ composer require asgoodasnu/akeneo-api-bundle:*@dev
 ```
 (maybe you get an exception, because the configuration is missing.)
 
-Now add a configuration file in config/packages&/akeneo_api.yaml
+Now add a configuration file in config/packages/akeneo_api.yaml
 ```
 asgoodasnew_akeneo_api:
   url: '%env(AKENEO_API_URL)%'
@@ -25,7 +25,7 @@ asgoodasnew_akeneo_api:
   token: '%env(AKENEO_AUTH_TOKEN)%'
   cached: false
 ```
-If cached is set to true, 
+If cached is set to true, results will be cached for 60 minutes
 
 Add environment variables or add the values to the .env file:
 ```
