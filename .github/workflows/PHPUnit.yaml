@@ -1,0 +1,17 @@
+on: [push]
+name: PHPUnit
+jobs:
+  PHPUnit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          tools: pecl
+          extensions: amqp
+          coverage: xdebug
+      - uses: php-actions/composer@v1
+      - name: PHPUnit
+        run: |
+          make test-coverage

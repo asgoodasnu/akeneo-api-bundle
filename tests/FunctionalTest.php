@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Kernel;
 
 class FunctionalTest extends TestCase
 {
-    public function testServiceWiring()
+    public function testServiceWiring(): void
     {
         $kernel = new AkeneoApiTestingKernel([
             'url' => 'url',
@@ -33,8 +33,14 @@ class FunctionalTest extends TestCase
 
 class AkeneoApiTestingKernel extends Kernel
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $akeneoApiConfig;
 
+    /**
+     * @param array<string, mixed> $akeneoApiConfig
+     */
     public function __construct(array $akeneoApiConfig)
     {
         parent::__construct('test', true);
@@ -42,14 +48,17 @@ class AkeneoApiTestingKernel extends Kernel
         $this->akeneoApiConfig = $akeneoApiConfig;
     }
 
-    public function registerBundles()
+    /**
+     * @return AsgoodasnewAkeneoApiBundle[]
+     */
+    public function registerBundles(): array
     {
         return [
             new AsgoodasnewAkeneoApiBundle(),
         ];
     }
 
-    public function registerContainerConfiguration(LoaderInterface $loader)
+    public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         $loader->load(function (ContainerBuilder $containerBuilder) {
             $containerBuilder->register(
@@ -61,8 +70,8 @@ class AkeneoApiTestingKernel extends Kernel
         });
     }
 
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
-        return __DIR__ . '/../var/' . spl_object_hash($this);
+        return __DIR__.'/../var/'.spl_object_hash($this);
     }
 }

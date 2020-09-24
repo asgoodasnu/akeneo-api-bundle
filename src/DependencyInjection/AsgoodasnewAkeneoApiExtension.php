@@ -6,7 +6,6 @@ namespace Asgoodasnew\AkeneoApiBundle\DependencyInjection;
 
 use Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi;
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -15,8 +14,10 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class AsgoodasnewAkeneoApiExtension extends Extension
 {
-
-    public function load(array $configs, ContainerBuilder $container)
+    /**
+     * @param array<string, mixed> $configs
+     */
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $config = $this->handleConfigs($container, $configs);
 
@@ -40,20 +41,29 @@ class AsgoodasnewAkeneoApiExtension extends Extension
         $decorated->setArgument(1, new Reference('Psr\Cache\CacheItemPoolInterface'));
 
         $container->addDefinitions([
-            'asgoodasnew_akeneo_api.cached_symfony_http_client_akeneo_api' => $decorated
+            'asgoodasnew_akeneo_api.cached_symfony_http_client_akeneo_api' => $decorated,
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $configs
+     *
+     * @return array<string, mixed>
+     */
     private function handleConfigs(ContainerBuilder $container, array $configs): array
     {
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
+
         return $config;
     }
 
+    /**
+     * @param array<string, mixed> $config
+     */
     private function addArgumentsToAuthenticator(ContainerBuilder $container, array $config): void
     {
         $container
@@ -64,7 +74,7 @@ class AsgoodasnewAkeneoApiExtension extends Extension
             ->setArgument(3, $config['token']);
     }
 
-    private function addArgumentsToSymfonyHttpClient(ContainerBuilder $container, $url): void
+    private function addArgumentsToSymfonyHttpClient(ContainerBuilder $container, string $url): void
     {
         $container->getDefinition('asgoodasnew_akeneo_api.symfony_http_client_akeneo_api')
             ->setArgument(0, $url);
