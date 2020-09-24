@@ -38,7 +38,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
     protected $authToken;
 
     /**
-     * @var HttpClientInterface|MockObject
+     * @var MockObject
      */
     protected $client;
 

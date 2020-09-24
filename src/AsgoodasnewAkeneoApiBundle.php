@@ -8,5 +8,4 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class AsgoodasnewAkeneoApiBundle extends Bundle
 {
-
 }

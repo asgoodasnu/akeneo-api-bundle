@@ -18,12 +18,12 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     protected string $baseUrl;
 
     /**
-     * @var HttpClientInterface|MockObject
+     * @var MockObject
      */
     protected $client;
 
     /**
-     * @var AkeneoApiAuthenticator|MockObject
+     * @var MockObject
      */
     protected $akeneoApiAuthenticator;
 

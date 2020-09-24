@@ -22,12 +22,12 @@ class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
     protected CachedSymfonyHttpClientAkeneoApi $cachedSymfonyHttpClientAkeneoApi;
 
     /**
-     * @var AkeneoApi|MockObject
+     * @var MockObject
      */
     protected $decorated;
 
     /**
-     * @var CacheItemPoolInterface|MockObject
+     * @var MockObject
      */
     protected $cache;
 
