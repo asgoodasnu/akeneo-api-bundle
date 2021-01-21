@@ -35,6 +35,11 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
         return $productArray;
     }
 
+    public function triggerUpdate(string $identifier, ?string $message = null): void
+    {
+        $this->decorated->triggerUpdate($identifier);
+    }
+
     /**
      * @param array<mixed> $productArray
      */
