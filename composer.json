@@ -10,6 +10,7 @@
     ],
     "require": {
         "php": "^7.4",
+        "ext-json": "*",
         "symfony/config": "^5.0",
         "symfony/dependency-injection": "^5.0",
         "symfony/http-kernel": "^5.0",
