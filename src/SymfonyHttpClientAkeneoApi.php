@@ -117,7 +117,6 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
 
         return <<<EOBODY
 {
-  "identifier": "$identifier",
   "values": {
     "agan_pattribut_check_field": [
       {
