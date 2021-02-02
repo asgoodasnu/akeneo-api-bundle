@@ -6,17 +6,13 @@ namespace Asgoodasnew\AkeneoApiBundle\Tests;
 
 use Asgoodasnew\AkeneoApiBundle\AkeneoApi;
 use Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi;
+use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class CachedSymfonyHttpClientAkeneoApiTest.
- *
- * @covers \Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi
- */
 class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
 {
     protected CachedSymfonyHttpClientAkeneoApi $cachedSymfonyHttpClientAkeneoApi;
@@ -119,5 +115,28 @@ class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
             ->with($cacheItem);
 
         $this->assertSame($productArray, $this->cachedSymfonyHttpClientAkeneoApi->getProduct($sku));
+    }
+
+    public function testGetCategories(): void
+    {
+        $item = new CategoryItem('code', 'title');
+
+        $this->decorated
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with('root')
+            ->willReturn($item);
+
+        $this->assertSame($item, $this->cachedSymfonyHttpClientAkeneoApi->getCategories('root'));
+    }
+
+    public function testTriggerUpdate(): void
+    {
+        $this->decorated
+            ->expects($this->once())
+            ->method('triggerUpdate')
+            ->with('identifier');
+
+        $this->cachedSymfonyHttpClientAkeneoApi->triggerUpdate('identifier');
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asgoodasnew\AkeneoApiBundle;
 
+use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
@@ -61,5 +62,10 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
     private function createCacheItem(string $identifier): CacheItemInterface
     {
         return $this->cache->getItem($identifier);
+    }
+
+    public function getCategories(string $rootCode): CategoryItem
+    {
+        return $this->decorated->getCategories($rootCode);
     }
 }

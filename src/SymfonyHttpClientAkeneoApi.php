@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Asgoodasnew\AkeneoApiBundle;
 
+use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -16,14 +17,18 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
 
     private HttpClientInterface $client;
     private AkeneoApiAuthenticator $akeneoApiAuthenticator;
+    private CategoryTreeBuilder $categoryTreeBuilder;
 
-    public function __construct(string $baseUrl,
-                                HttpClientInterface $client,
-                                AkeneoApiAuthenticator $akeneoApiAuthenticator)
-    {
+    public function __construct(
+        string $baseUrl,
+        HttpClientInterface $client,
+        AkeneoApiAuthenticator $akeneoApiAuthenticator,
+        CategoryTreeBuilder $categoryTreeBuilder
+    ) {
         $this->baseUrl = $baseUrl;
         $this->client = $client;
         $this->akeneoApiAuthenticator = $akeneoApiAuthenticator;
+        $this->categoryTreeBuilder = $categoryTreeBuilder;
     }
 
     /**
@@ -45,6 +50,31 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         }
 
         return json_decode($response->getContent(), true);
+    }
+
+    public function getCategories(string $rootCode): CategoryItem
+    {
+        $nextUrl = $this->buildUrl('/api/rest/v1/categories');
+
+        $items = [];
+
+        while ($nextUrl) {
+            try {
+                $response = $this->client->request(Request::METHOD_GET, $nextUrl, $this->getDefaultHeaders());
+            } catch (\Exception $e) {
+                throw AkeneoApiException::fromException($e);
+            }
+
+            $json = json_decode($response->getContent(), true);
+
+            $nextUrl = $json['_links']['next']['href'] ?? null;
+
+            $newItems = $json['_embedded']['items'];
+
+            $items = array_merge($items, $newItems);
+        }
+
+        return $this->categoryTreeBuilder->build($rootCode, $items);
     }
 
     /**
@@ -100,8 +130,8 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
     {
         try {
             $this->getProduct($identifier);
-        } catch (ClientExceptionInterface $e) {
-            throw AkeneoApiException::createProductNotFound($e);
+        } catch (AkeneoApiProductNotFoundException $e) {
+            throw $e;
         } catch (\Exception $exception) {
             throw AkeneoApiException::fromException($exception);
         }
