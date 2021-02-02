@@ -13,7 +13,7 @@ jobs:
           coverage: xdebug
       - uses: php-actions/composer@v5
         with:
-          php-version: '7.4'
+          php_version: '7.4'
       - name: PHPUnit
         run: |
           make test-coverage
