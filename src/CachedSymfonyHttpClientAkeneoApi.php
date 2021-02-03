@@ -32,51 +32,17 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
      */
     public function getProduct(string $identifier): array
     {
-        $cacheItem = $this->createCacheItem($identifier);
+        $cacheItem = $this->cache->getItem($identifier);
 
         if ($cacheItem->isHit()) {
             return $cacheItem->get();
         }
 
-        $productArray = $this->getDecoratedResult($identifier);
+        $productArray = $this->decorated->getProduct($identifier);
 
         $this->saveToCache($cacheItem, $productArray);
 
         return $productArray;
-    }
-
-    public function triggerUpdate(string $identifier, ?string $message = null): void
-    {
-        $this->decorated->triggerUpdate($identifier);
-    }
-
-    /**
-     * @param array<mixed>|CategoryItem $productArray
-     */
-    private function saveToCache(CacheItemInterface $cacheItem, $productArray): void
-    {
-        $cacheItem->expiresAfter(self::A_HOUR);
-        $cacheItem->set($productArray);
-        $this->cache->save($cacheItem);
-    }
-
-    /**
-     * @return array<mixed>
-     *
-     * @throws AkeneoApiException
-     * @throws AkeneoApiProductNotFoundException
-     */
-    private function getDecoratedResult(string $identifier): array
-    {
-        return $this->decorated->getProduct($identifier);
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    private function createCacheItem(string $key): CacheItemInterface
-    {
-        return $this->cache->getItem($key);
     }
 
     /**
@@ -85,7 +51,7 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
      */
     public function getCategories(string $rootCode): CategoryItem
     {
-        $cacheItem = $this->createCacheItem(self::CACHE_KEY_CATEGORIES);
+        $cacheItem = $this->cache->getItem(self::CACHE_KEY_CATEGORIES);
 
         if ($cacheItem->isHit()) {
             return $cacheItem->get();
@@ -96,5 +62,20 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
         $this->saveToCache($cacheItem, $item);
 
         return $item;
+    }
+
+    public function triggerUpdate(string $identifier, ?string $message = null): void
+    {
+        $this->decorated->triggerUpdate($identifier);
+    }
+
+    /**
+     * @param array<mixed>|CategoryItem $value
+     */
+    private function saveToCache(CacheItemInterface $cacheItem, $value): void
+    {
+        $cacheItem->expiresAfter(self::A_HOUR);
+        $cacheItem->set($value);
+        $this->cache->save($cacheItem);
     }
 }
