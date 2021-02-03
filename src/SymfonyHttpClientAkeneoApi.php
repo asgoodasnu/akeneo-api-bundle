@@ -54,7 +54,7 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
 
     public function getCategories(string $rootCode): CategoryItem
     {
-        $nextUrl = $this->buildUrl('/api/rest/v1/categories');
+        $nextUrl = $this->buildUrl('/api/rest/v1/categories?limit=100');
 
         $items = [];
 
@@ -130,8 +130,6 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
     {
         try {
             $this->getProduct($identifier);
-        } catch (AkeneoApiProductNotFoundException $e) {
-            throw $e;
         } catch (\Exception $exception) {
             throw AkeneoApiException::fromException($exception);
         }

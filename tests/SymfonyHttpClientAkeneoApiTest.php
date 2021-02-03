@@ -143,7 +143,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $this->client
             ->expects($this->once())
             ->method('request')
-            ->with('GET', 'http://url/api/rest/v1/categories', [
+            ->with('GET', 'http://url/api/rest/v1/categories?limit=100', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer token',
@@ -178,7 +178,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $this->client
             ->expects($this->once())
             ->method('request')
-            ->with('GET', 'http://url/api/rest/v1/categories', [
+            ->with('GET', 'http://url/api/rest/v1/categories?limit=100', [
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer token',

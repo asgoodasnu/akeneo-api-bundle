@@ -7,10 +7,12 @@ namespace Asgoodasnew\AkeneoApiBundle;
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 
 class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
 {
     const A_HOUR = 3600;
+    const CACHE_KEY_CATEGORIES = 'akeneo-api-bundle-categories';
 
     private AkeneoApi $decorated;
     private CacheItemPoolInterface $cache;
@@ -21,6 +23,13 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
         $this->cache = $cache;
     }
 
+    /**
+     * @return array<mixed>
+     *
+     * @throws AkeneoApiException
+     * @throws AkeneoApiProductNotFoundException
+     * @throws InvalidArgumentException
+     */
     public function getProduct(string $identifier): array
     {
         $cacheItem = $this->createCacheItem($identifier);
@@ -42,9 +51,9 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
     }
 
     /**
-     * @param array<mixed> $productArray
+     * @param array<mixed>|CategoryItem $productArray
      */
-    private function saveToCache(CacheItemInterface $cacheItem, array $productArray): void
+    private function saveToCache(CacheItemInterface $cacheItem, $productArray): void
     {
         $cacheItem->expiresAfter(self::A_HOUR);
         $cacheItem->set($productArray);
@@ -53,19 +62,39 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
 
     /**
      * @return array<mixed>
+     *
+     * @throws AkeneoApiException
+     * @throws AkeneoApiProductNotFoundException
      */
     private function getDecoratedResult(string $identifier): array
     {
         return $this->decorated->getProduct($identifier);
     }
 
-    private function createCacheItem(string $identifier): CacheItemInterface
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function createCacheItem(string $key): CacheItemInterface
     {
-        return $this->cache->getItem($identifier);
+        return $this->cache->getItem($key);
     }
 
+    /**
+     * @throws AkeneoApiException
+     * @throws InvalidArgumentException
+     */
     public function getCategories(string $rootCode): CategoryItem
     {
-        return $this->decorated->getCategories($rootCode);
+        $cacheItem = $this->createCacheItem(self::CACHE_KEY_CATEGORIES);
+
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        $item = $this->decorated->getCategories($rootCode);
+
+        $this->saveToCache($cacheItem, $item);
+
+        return $item;
     }
 }
