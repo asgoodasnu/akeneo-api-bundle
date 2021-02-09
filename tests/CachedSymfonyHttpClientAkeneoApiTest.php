@@ -5,119 +5,208 @@ declare(strict_types=1);
 namespace Asgoodasnew\AkeneoApiBundle\Tests;
 
 use Asgoodasnew\AkeneoApiBundle\AkeneoApi;
+use Asgoodasnew\AkeneoApiBundle\AkeneoApiException;
+use Asgoodasnew\AkeneoApiBundle\AkeneoApiProductNotFoundException;
 use Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi;
+use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 
-/**
- * Class CachedSymfonyHttpClientAkeneoApiTest.
- *
- * @covers \Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi
- */
 class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
 {
     protected CachedSymfonyHttpClientAkeneoApi $cachedSymfonyHttpClientAkeneoApi;
 
-    /**
-     * @var MockObject
-     */
+    /** @var MockObject */
     protected $decorated;
 
-    /**
-     * @var MockObject
-     */
+    /** @var MockObject */
     protected $cache;
 
-    /**
-     * @var LoggerInterface|MockObject
-     */
+    /** @var MockObject */
+    private $cacheItem;
+
+    /** @var MockObject */
     protected $logger;
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->decorated = $this->createMock(AkeneoApi::class);
         $this->cache = $this->createMock(CacheItemPoolInterface::class);
+        $this->cacheItem = $this->createMock(CacheItemInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->cachedSymfonyHttpClientAkeneoApi = new CachedSymfonyHttpClientAkeneoApi($this->decorated, $this->cache);
     }
 
+    /**
+     * @throws AkeneoApiException
+     * @throws AkeneoApiProductNotFoundException
+     * @throws InvalidArgumentException
+     */
     public function testGetProductCached(): void
     {
         $sku = 'AN12345';
 
-        $productArray = [
-            'key' => 'value',
-        ];
+        $productArray = ['key' => 'value'];
 
-        $cacheItem = $this->createMock(CacheItemInterface::class);
+        $this->assertCacheHit($sku, $productArray);
 
-        $this->cache
-            ->expects($this->once())
-            ->method('getItem')
+        $this->decorated
+            ->expects(self::never())
+            ->method('getProduct');
+
+        $this->assertSame($productArray, $this->cachedSymfonyHttpClientAkeneoApi->getProduct($sku));
+    }
+
+    /**
+     * @throws AkeneoApiException
+     * @throws AkeneoApiProductNotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function testGetProductNotCached(): void
+    {
+        $sku = 'AN12345';
+
+        $productArray = ['key' => 'value'];
+
+        $this->assertCacheNotHitAndSaved($sku, $productArray);
+
+        $this->decorated
+            ->expects(self::once())
+            ->method('getProduct')
             ->with($sku)
-            ->willReturn($cacheItem);
-
-        $cacheItem
-            ->expects($this->once())
-            ->method('isHit')
-            ->willReturn(true);
-
-        $cacheItem
-            ->expects($this->once())
-            ->method('get')
             ->willReturn($productArray);
 
         $this->assertSame($productArray, $this->cachedSymfonyHttpClientAkeneoApi->getProduct($sku));
     }
 
-    public function testGetProductNotCached(): void
+    public function testGetCategoriesCached(): void
     {
-        $sku = 'AN12345';
+        $item = new CategoryItem('code', 'title');
+        $cacheKey = 'akeneo-api-bundle-categories';
 
-        $productArray = [
-            'key' => 'value',
-        ];
+        $this->assertCacheHit($cacheKey, $item);
+
+        $this->decorated
+            ->expects($this->never())
+            ->method('getCategories');
+
+        $this->assertSame($item, $this->cachedSymfonyHttpClientAkeneoApi->getCategories('root'));
+    }
+
+    public function testGetCategoriesNotCached(): void
+    {
+        $item = new CategoryItem('code', 'title');
+        $cacheKey = 'akeneo-api-bundle-categories';
+
+        $this->assertCacheNotHitAndSaved($cacheKey, $item);
 
         $this->decorated
             ->expects($this->once())
-            ->method('getProduct')
-            ->with($sku)
-            ->willReturn($productArray);
+            ->method('getCategories')
+            ->with('root')
+            ->willReturn($item);
 
-        $cacheItem = $this->createMock(CacheItemInterface::class);
+        $this->assertSame($item, $this->cachedSymfonyHttpClientAkeneoApi->getCategories('root'));
+    }
 
+    /**
+     * @throws AkeneoApiException
+     */
+    public function testTriggerUpdate(): void
+    {
+        $this->decorated
+            ->expects($this->once())
+            ->method('triggerUpdate')
+            ->with('identifier');
+
+        $this->cachedSymfonyHttpClientAkeneoApi->triggerUpdate('identifier');
+    }
+
+    /**
+     * @param array<mixed>|object $value
+     */
+    private function assertCacheNotHitAndSaved(string $cacheKey, $value): void
+    {
+        $this->assertCacheGetItem($cacheKey);
+
+        $this->assertCacheItemIsHit(false);
+
+        $this->assertCacheItemSet($value);
+
+        $this->assertCacheItemExpiresAfter();
+
+        $this->assertCacheSave();
+    }
+
+    /**
+     * @param array<mixed>|object $value
+     */
+    private function assertCacheHit(string $cacheKey, $value): void
+    {
+        $this->assertCacheGetItem($cacheKey);
+
+        $this->assertCacheItemIsHit(true);
+
+        $this->assertCacheItemGet($value);
+    }
+
+    private function assertCacheGetItem(string $cacheKey): void
+    {
         $this->cache
-            ->expects($this->once())
+            ->expects(self::once())
             ->method('getItem')
-            ->with($sku)
-            ->willReturn($cacheItem);
+            ->with($cacheKey)
+            ->willReturn($this->cacheItem);
+    }
 
-        $cacheItem
-            ->expects($this->once())
+    private function assertCacheItemIsHit(bool $result): void
+    {
+        $this->cacheItem
+            ->expects(self::once())
             ->method('isHit')
-            ->willReturn(false);
+            ->willReturn($result);
+    }
 
-        $cacheItem
-            ->expects($this->once())
+    /**
+     * @param array<mixed>|object $value
+     */
+    private function assertCacheItemGet($value): void
+    {
+        $this->cacheItem
+            ->expects(self::once())
+            ->method('get')
+            ->willReturn($value);
+    }
+
+    /**
+     * @param array<mixed>|object $value
+     */
+    private function assertCacheItemSet($value): void
+    {
+        $this->cacheItem
+            ->expects(self::once())
             ->method('set')
-            ->with($productArray);
+            ->with($value);
+    }
 
-        $cacheItem
-            ->expects($this->once())
+    private function assertCacheItemExpiresAfter(): void
+    {
+        $this->cacheItem
+            ->expects(self::once())
             ->method('expiresAfter')
             ->with(3600);
+    }
 
+    private function assertCacheSave(): void
+    {
         $this->cache
             ->expects($this->once())
             ->method('save')
-            ->with($cacheItem);
-
-        $this->assertSame($productArray, $this->cachedSymfonyHttpClientAkeneoApi->getProduct($sku));
+            ->with($this->cacheItem);
     }
 }

@@ -18,7 +18,7 @@ class FunctionalTest extends TestCase
             'user' => 'user',
             'password' => 'password',
             'token' => 'token',
-            'cached' => false,
+            'cached' => true,
         ]);
 
         $kernel->boot();
@@ -64,6 +64,11 @@ class AkeneoApiTestingKernel extends Kernel
             $containerBuilder->register(
                 'Symfony\Contracts\HttpClient\HttpClientInterface',
                 'Symfony\Component\HttpClient\NativeHttpClient'
+            );
+
+            $containerBuilder->register(
+                'Psr\Cache\CacheItemPoolInterface',
+                'Symfony\Component\Cache\Adapter\FilesystemAdapter'
             );
 
             $containerBuilder->loadFromExtension('asgoodasnew_akeneo_api', $this->akeneoApiConfig);
