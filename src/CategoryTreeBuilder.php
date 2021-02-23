@@ -43,7 +43,7 @@ class CategoryTreeBuilder
     {
         foreach ($items as $item) {
             if ($item['code'] === $code) {
-                return new CategoryItem($code, $item['labels']['de_DE'] ?? 'undefined');
+                return new CategoryItem($code, $item['labels']['de_DE'] ?? '');
             }
         }
 
