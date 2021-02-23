@@ -61,7 +61,7 @@ class CategoryTreeBuilder
 
         foreach ($items as $i) {
             if ($i['parent'] === $item->getCode()) {
-                $children[] = new CategoryItem($i['code'], $i['labels']['de_DE'] ?? 'undefined');
+                $children[] = new CategoryItem($i['code'], $i['labels']['de_DE'] ?? '');
             }
         }
 
