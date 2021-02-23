@@ -16,4 +16,4 @@ jobs:
           php_version: '7.4'
       - name: PHPUnit
         run: |
-          make test-coverage
+          php vendor/bin/simple-phpunit -v --coverage-clover clover-coverage.xml --coverage-html coverage_html --log-junit coverage_html/junit.xml
