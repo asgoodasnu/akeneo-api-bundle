@@ -23,7 +23,13 @@
             <argument type="string"/>
             <argument type="service" id="Symfony\Contracts\HttpClient\HttpClientInterface"/>
             <argument type="service" id="asgoodasnew_akeneo_api.akeneo_api_authenticator"/>
+            <argument type="service" id="asgoodasnew_akeneo_api.category_tree_builder"/>
         </service>
+
+        <service
+                id="asgoodasnew_akeneo_api.category_tree_builder"
+                class="Asgoodasnew\AkeneoApiBundle\CategoryTreeBuilder"
+        />
 
         <service
                 id="asgoodasnew_akeneo_api.akeneo_api_authenticator"
@@ -35,15 +41,5 @@
             <argument type="string"/>
             <argument type="service" id="Symfony\Contracts\HttpClient\HttpClientInterface"/>
         </service>
-
-<!--        <service-->
-<!--                id="asgoodasnew_akeneo_api.cached_symfony_http_client_akeneo_api"-->
-<!--                class="Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi"-->
-<!--                decorates="asgoodasnew_akeneo_api.symfony_http_client_akeneo_api"-->
-<!--        >-->
-<!--            <argument type="service" id="asgoodasnew_akeneo_api.cached_symfony_http_client_akeneo_api.inner"/>-->
-<!--            <argument type="service" id="Psr\Cache\CacheItemPoolInterface"/>-->
-<!--        </service>-->
-
     </services>
 </container>

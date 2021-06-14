@@ -3,3 +3,7 @@
 composer.lock
 .phpunit.result.cache
 /var/
+.php_cs.cache
+clover-coverage.xml
+coverage_html
+akeneo_test.php

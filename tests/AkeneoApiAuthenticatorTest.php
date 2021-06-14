@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Asgoodasnew\AkeneoApiBundle\Tests;
 
 use Asgoodasnew\AkeneoApiBundle\AkeneoApiAuthenticator;
+use Asgoodasnew\AkeneoApiBundle\AkeneoApiAuthorizationFailedException;
+use Asgoodasnew\AkeneoApiBundle\AkeneoApiException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpClient\Exception\ClientException;
+use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -44,8 +48,6 @@ class AkeneoApiAuthenticatorTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $this->baseUrl = 'http://url';
         $this->apiUser = 'user';
         $this->apiPassword = 'password';
@@ -82,5 +84,46 @@ class AkeneoApiAuthenticatorTest extends TestCase
             ->willReturn('{"access_token": "xyz"}');
 
         $this->assertSame('xyz', $this->akeneoApiAuthenticator->getToken());
+
+        // check that getToken in second call is taken from stored value
+        $this->assertSame('xyz', $this->akeneoApiAuthenticator->getToken());
+    }
+
+    public function testGetTokenClientException(): void
+    {
+        $this->client
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'http://url/api/oauth/v1/token', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Basic token',
+                ],
+                'body' => '{"grant_type":"password","username":"user","password":"password"}',
+            ])
+            ->willThrowException(new ClientException(new MockResponse()));
+
+        self::expectException(AkeneoApiAuthorizationFailedException::class);
+
+        $this->akeneoApiAuthenticator->getToken();
+    }
+
+    public function testGetTokenException(): void
+    {
+        $this->client
+            ->expects($this->once())
+            ->method('request')
+            ->with('POST', 'http://url/api/oauth/v1/token', [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Basic token',
+                ],
+                'body' => '{"grant_type":"password","username":"user","password":"password"}',
+            ])
+            ->willThrowException(new \Exception());
+
+        self::expectException(AkeneoApiException::class);
+
+        $this->akeneoApiAuthenticator->getToken();
     }
 }
