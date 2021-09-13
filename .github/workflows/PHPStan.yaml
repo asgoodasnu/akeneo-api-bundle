@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: '8.0'
           tools: pecl
           extensions: gd
           coverage: xdebug
@@ -28,7 +28,7 @@ jobs:
         run: composer install --prefer-dist
 
       - name: Install PHPUnit dependencies
-        run: bin/phpunit --help
+        run: vendor/bin/simple-phpunit --help
 
       - name: PHPStan
         run: |
