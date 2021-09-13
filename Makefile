@@ -10,6 +10,6 @@ analyse:
 	@symfony php vendor/bin/phpstan analyse src/ tests/ --level 7
 	
 test-coverage:
-	@symfony php vendor/bin/simple-phpunit -v --coverage-clover clover-coverage.xml --coverage-html coverage_html --log-junit coverage_html/junit.xml
+	@symfony php vendor/bin/phpunit -v --coverage-clover clover-coverage.xml --coverage-html coverage_html --log-junit coverage_html/junit.xml
 
 all: cs test-coverage analyse

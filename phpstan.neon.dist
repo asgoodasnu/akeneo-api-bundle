@@ -1,5 +1,5 @@
 parameters:
     bootstrapFiles:
-        - vendor/bin/.phpunit/phpunit/vendor/autoload.php
+        - vendor/autoload.php
     excludes_analyse:
         - src/DependencyInjection/Configuration.php
