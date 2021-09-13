@@ -12,4 +12,4 @@ analyse:
 test-coverage:
 	@symfony php vendor/bin/simple-phpunit -v --coverage-clover clover-coverage.xml --coverage-html coverage_html --log-junit coverage_html/junit.xml
 
-all: cs analyse test-coverage
+all: cs test-coverage analyse

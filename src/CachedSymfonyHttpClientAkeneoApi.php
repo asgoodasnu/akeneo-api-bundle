@@ -11,8 +11,8 @@ use Psr\Cache\InvalidArgumentException;
 
 class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
 {
-    const A_HOUR = 3600;
-    const CACHE_KEY_CATEGORIES = 'akeneo-api-bundle-categories';
+    public const A_HOUR = 3600;
+    public const CACHE_KEY_CATEGORIES = 'akeneo-api-bundle-categories';
 
     private AkeneoApi $decorated;
     private CacheItemPoolInterface $cache;
