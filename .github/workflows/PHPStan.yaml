@@ -28,7 +28,7 @@ jobs:
         run: composer install --prefer-dist
 
       - name: Install PHPUnit dependencies
-        run: vendor/bin/simple-phpunit --help
+        run: bin/phpunit --help
 
       - name: PHPStan
         run: |
