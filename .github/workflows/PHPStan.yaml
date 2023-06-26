@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@master
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
+          php-version: '8.2'
           tools: pecl
           extensions: gd
           coverage: xdebug
@@ -32,4 +32,4 @@ jobs:
 
       - name: PHPStan
         run: |
-          vendor/bin/phpstan analyse src/ tests/ --level 7
+          vendor/bin/phpstan analyse
