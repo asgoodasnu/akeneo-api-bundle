@@ -10,7 +10,6 @@ use Asgoodasnew\AkeneoApiBundle\AkeneoApiProductNotFoundException;
 use Asgoodasnew\AkeneoApiBundle\CategoryTreeBuilder;
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use Asgoodasnew\AkeneoApiBundle\SymfonyHttpClientAkeneoApi;
-use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\Exception\ClientException;
@@ -82,13 +81,14 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     }
 
     /**
-     * @param class-string<Exception> $thrownException
+     * @param class-string<\Exception> $thrownException
+     *
      * @dataProvider dataProviderExceptions
      *
      * @throws AkeneoApiProductNotFoundException
      * @throws AkeneoApiException
      */
-    public function testGetProductExceptions(Exception $exception, $thrownException): void
+    public function testGetProductExceptions(\Exception $exception, $thrownException): void
     {
         $sku = 'AN12345';
 
@@ -122,7 +122,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     {
         return [
             [new ClientException(new MockResponse()), AkeneoApiProductNotFoundException::class],
-            [new Exception(), AkeneoApiException::class],
+            [new \Exception(), AkeneoApiException::class],
         ];
     }
 
@@ -184,7 +184,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     'Authorization' => 'Bearer token',
                 ],
             ])
-            ->willThrowException(new Exception());
+            ->willThrowException(new \Exception());
 
         self::expectException(AkeneoApiException::class);
 
@@ -285,7 +285,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     ],
                 ]
             )
-            ->willThrowException(new Exception());
+            ->willThrowException(new \Exception());
 
         self::expectException(AkeneoApiException::class);
 
@@ -321,7 +321,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     return $response;
                 }
 
-                throw new Exception();
+                throw new \Exception();
             });
 
         self::expectException(AkeneoApiException::class);
