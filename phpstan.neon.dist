@@ -1,5 +1,9 @@
 parameters:
     bootstrapFiles:
         - vendor/autoload.php
-    excludes_analyse:
+    level: 7
+    paths:
+        - src
+        - tests
+    excludePaths:
         - src/DependencyInjection/Configuration.php

@@ -64,7 +64,7 @@ class CachedSymfonyHttpClientAkeneoApi implements AkeneoApi
         return $item;
     }
 
-    public function triggerUpdate(string $identifier, ?string $message = null): void
+    public function triggerUpdate(string $identifier, string $message = null): void
     {
         $this->decorated->triggerUpdate($identifier);
     }
