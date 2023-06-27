@@ -1,7 +1,9 @@
 parameters:
     bootstrapFiles:
-        - vendor/bin/.phpunit/phpunit/vendor/autoload.php
-    excludes_analyse:
+        - vendor/autoload.php
+    level: 7
+    paths:
+        - src
+        - tests
+    excludePaths:
         - src/DependencyInjection/Configuration.php
-    ignoreErrors:
-        - '#PHPDoc tag @throws with type [a-zA-Z0-9\\_\\]| is not subtype of Throwable#'

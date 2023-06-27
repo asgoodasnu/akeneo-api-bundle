@@ -2,17 +2,18 @@
 $finder = PhpCsFixer\Finder::create()
     ->in('src')
     ->in('tests')
-    ->notPath('src/Migrations/migration.tpl')
 ;
-return PhpCsFixer\Config::create()
+
+$config = new PhpCsFixer\Config();
+return $config
     ->setRiskyAllowed(true)
     ->setRules([
+        '@PSR12' => true,
         '@Symfony' => true,
+        'full_opening_tag' => false,
+        'array_syntax' => ['syntax' => 'short'],
         'ordered_imports' => true,
         'no_unused_imports' => true,
-        'psr4' => true,
-        'psr0' => true,
-        'array_syntax' => ['syntax' => 'short'],
         'no_superfluous_phpdoc_tags' => true,
         'linebreak_after_opening_tag' => true,
         'logical_operators' => true,
@@ -22,4 +23,4 @@ return PhpCsFixer\Config::create()
         ]
     ])
     ->setFinder($finder)
-;
+    ;

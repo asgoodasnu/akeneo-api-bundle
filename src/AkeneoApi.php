@@ -22,5 +22,5 @@ interface AkeneoApi
     /**
      * @throws AkeneoApiException
      */
-    public function triggerUpdate(string $identifier, ?string $message = null): void;
+    public function triggerUpdate(string $identifier, string $message = null): void;
 }
