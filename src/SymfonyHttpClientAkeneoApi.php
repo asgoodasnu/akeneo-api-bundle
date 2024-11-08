@@ -23,7 +23,7 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         string $baseUrl,
         HttpClientInterface $client,
         AkeneoApiAuthenticator $akeneoApiAuthenticator,
-        CategoryTreeBuilder $categoryTreeBuilder
+        CategoryTreeBuilder $categoryTreeBuilder,
     ) {
         $this->baseUrl = $baseUrl;
         $this->client = $client;
@@ -39,7 +39,7 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
      */
     public function getProduct(string $identifier): array
     {
-        $url = $this->buildUrl(sprintf('/api/rest/v1/products/%s', $identifier));
+        $url = $this->buildUrl(\sprintf('/api/rest/v1/products/%s', $identifier));
 
         try {
             $response = $this->client->request(Request::METHOD_GET, $url, $this->getDefaultHeaders());
@@ -90,7 +90,7 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         try {
             $response = $this->client->request(
                 Request::METHOD_PATCH,
-                $this->buildUrl(sprintf('/api/rest/v1/products/%s', $identifier)),
+                $this->buildUrl(\sprintf('/api/rest/v1/products/%s', $identifier)),
                 $options
             );
 
@@ -112,14 +112,14 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         return [
             'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => sprintf('Bearer %s', $this->token),
+                'Authorization' => \sprintf('Bearer %s', $this->token),
             ],
         ];
     }
 
     private function buildUrl(string $endpoint): string
     {
-        return sprintf('%s%s', $this->baseUrl, $endpoint);
+        return \sprintf('%s%s', $this->baseUrl, $endpoint);
     }
 
     /**
@@ -137,7 +137,7 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
 
     private function getTriggerUpdateBody(string $identifier, ?string $message): string
     {
-        $value = sprintf(
+        $value = \sprintf(
             '%s - %s',
             (new \DateTime())->format('Y-m-d H:i:s'),
             $message ?? 'update from AkeneoApiBundle'
