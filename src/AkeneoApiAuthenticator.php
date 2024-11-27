@@ -21,7 +21,7 @@ class AkeneoApiAuthenticator
         string $apiUser,
         string $apiPassword,
         string $authToken,
-        HttpClientInterface $client
+        HttpClientInterface $client,
     ) {
         $this->baseUrl = $baseUrl;
         $this->apiUser = $apiUser;
@@ -51,7 +51,7 @@ class AkeneoApiAuthenticator
                 $this->buildUrl('/api/oauth/v1/token'), [
                     'headers' => [
                         'Content-Type' => 'application/json',
-                        'Authorization' => sprintf('Basic %s', $this->authToken),
+                        'Authorization' => \sprintf('Basic %s', $this->authToken),
                     ],
                     'body' => $body,
                 ]
@@ -72,6 +72,6 @@ class AkeneoApiAuthenticator
 
     protected function buildUrl(string $endpoint): string
     {
-        return sprintf('%s%s', $this->baseUrl, $endpoint);
+        return \sprintf('%s%s', $this->baseUrl, $endpoint);
     }
 }
