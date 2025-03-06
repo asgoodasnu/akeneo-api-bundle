@@ -175,6 +175,12 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->method('getToken')
             ->willReturn($token);
 
+        $response = $this->createMock(ResponseInterface::class);
+        $response
+            ->expects($this->once())
+            ->method('getContent')
+            ->willThrowException(new \Exception());
+
         $this->client
             ->expects($this->once())
             ->method('request')
@@ -184,7 +190,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     'Authorization' => 'Bearer token',
                 ],
             ])
-            ->willThrowException(new \Exception());
+            ->willReturn($response);
 
         self::expectException(AkeneoApiException::class);
 

@@ -59,13 +59,13 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         $items = [];
 
         while ($nextUrl) {
+            $response = $this->client->request(Request::METHOD_GET, $nextUrl, $this->getDefaultHeaders());
+
             try {
-                $response = $this->client->request(Request::METHOD_GET, $nextUrl, $this->getDefaultHeaders());
+                $json = json_decode($response->getContent(), true);
             } catch (\Exception $e) {
                 throw AkeneoApiException::fromException($e);
             }
-
-            $json = json_decode($response->getContent(), true);
 
             $nextUrl = $json['_links']['next']['href'] ?? null;
 
