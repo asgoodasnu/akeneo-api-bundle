@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Asgoodasnew\AkeneoApiBundle;
 
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
+use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -43,13 +44,17 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
 
         try {
             $response = $this->client->request(Request::METHOD_GET, $url, $this->getDefaultHeaders());
-        } catch (ClientExceptionInterface $e) {
-            throw AkeneoApiException::createProductNotFound($e);
         } catch (\Exception $e) {
             throw AkeneoApiException::fromException($e);
         }
 
-        return json_decode($response->getContent(), true);
+        try {
+            $responseArray = $response->toArray();
+        } catch (ClientExceptionInterface $e) {
+            throw AkeneoApiException::createProductNotFound($e);
+        }
+
+        return $responseArray;
     }
 
     public function getCategories(string $rootCode): CategoryItem
@@ -59,17 +64,21 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         $items = [];
 
         while ($nextUrl) {
-            $response = $this->client->request(Request::METHOD_GET, $nextUrl, $this->getDefaultHeaders());
-
             try {
-                $json = json_decode($response->getContent(), true);
+                $response = $this->client->request(Request::METHOD_GET, $nextUrl, $this->getDefaultHeaders());
             } catch (\Exception $e) {
                 throw AkeneoApiException::fromException($e);
             }
 
-            $nextUrl = $json['_links']['next']['href'] ?? null;
+            try {
+                $responseArray = $response->toArray();
+            } catch (ClientException $e) {
+                throw AkeneoApiException::fromException($e);
+            }
 
-            $newItems = $json['_embedded']['items'];
+            $nextUrl = $responseArray['_links']['next']['href'] ?? null;
+
+            $newItems = $responseArray['_embedded']['items'];
 
             $items = array_merge($items, $newItems);
         }
