@@ -373,6 +373,9 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $this->symfonyHttpClientAkeneoApi->getProduct($sku);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getCategoriesResponseJson(): array
     {
         return [
