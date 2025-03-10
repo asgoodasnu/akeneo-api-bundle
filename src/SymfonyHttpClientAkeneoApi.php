@@ -6,7 +6,12 @@ namespace Asgoodasnew\AkeneoApiBundle;
 
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SymfonyHttpClientAkeneoApi implements AkeneoApi
@@ -43,13 +48,20 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
 
         try {
             $response = $this->client->request(Request::METHOD_GET, $url, $this->getDefaultHeaders());
-        } catch (ClientExceptionInterface $e) {
-            throw AkeneoApiException::createProductNotFound($e);
-        } catch (\Exception $e) {
+        } catch (TransportExceptionInterface $e) {
             throw AkeneoApiException::fromException($e);
         }
 
-        return json_decode($response->getContent(), true);
+        try {
+            return $response->toArray();
+        } catch (ClientExceptionInterface $e) {
+            if (Response::HTTP_NOT_FOUND === $e->getCode()) {
+                throw AkeneoApiException::createProductNotFound($e);
+            }
+            throw AkeneoApiException::fromException($e);
+        } catch (DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+            throw AkeneoApiException::fromException($e);
+        }
     }
 
     public function getCategories(string $rootCode): CategoryItem
@@ -61,15 +73,24 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
         while ($nextUrl) {
             try {
                 $response = $this->client->request(Request::METHOD_GET, $nextUrl, $this->getDefaultHeaders());
-            } catch (\Exception $e) {
+            } catch (TransportExceptionInterface $e) {
                 throw AkeneoApiException::fromException($e);
             }
 
-            $json = json_decode($response->getContent(), true);
+            try {
+                $responseArray = $response->toArray();
+            } catch (ClientExceptionInterface $e) {
+                if (Response::HTTP_NOT_FOUND === $e->getCode()) {
+                    throw AkeneoApiException::createProductNotFound($e);
+                }
+                throw AkeneoApiException::fromException($e);
+            } catch (DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+                throw AkeneoApiException::fromException($e);
+            }
 
-            $nextUrl = $json['_links']['next']['href'] ?? null;
+            $nextUrl = $responseArray['_links']['next']['href'] ?? null;
 
-            $newItems = $json['_embedded']['items'];
+            $newItems = $responseArray['_embedded']['items'];
 
             $items = array_merge($items, $newItems);
         }
