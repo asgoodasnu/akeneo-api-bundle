@@ -8,6 +8,9 @@ use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -56,8 +59,8 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
                 throw AkeneoApiException::createProductNotFound($e);
             }
             throw AkeneoApiException::fromException($e);
-        } catch (\Throwable $t) {
-            throw AkeneoApiException::fromException($t);
+        } catch (DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+            throw AkeneoApiException::fromException($e);
         }
     }
 
@@ -81,8 +84,8 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
                     throw AkeneoApiException::createProductNotFound($e);
                 }
                 throw AkeneoApiException::fromException($e);
-            } catch (\Throwable $t) {
-                throw AkeneoApiException::fromException($t);
+            } catch (DecodingExceptionInterface|RedirectionExceptionInterface|ServerExceptionInterface|TransportExceptionInterface $e) {
+                throw AkeneoApiException::fromException($e);
             }
 
             $nextUrl = $responseArray['_links']['next']['href'] ?? null;

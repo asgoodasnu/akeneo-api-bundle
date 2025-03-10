@@ -388,7 +388,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
 
         $response->expects($this->once())
             ->method('toArray')
-            ->willThrowException(new \Exception());
+            ->willThrowException(new TransportException());
 
         $this->client
             ->expects($this->exactly(1))
@@ -473,7 +473,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
 
         $response->expects($this->once())
             ->method('toArray')
-            ->willThrowException(new \Exception());
+            ->willThrowException(new TransportException());
 
         $this->client
             ->expects($this->exactly(1))
