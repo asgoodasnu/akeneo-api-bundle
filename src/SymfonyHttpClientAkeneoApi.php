@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Asgoodasnew\AkeneoApiBundle;
 
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
-use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;

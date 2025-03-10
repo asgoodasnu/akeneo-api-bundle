@@ -399,8 +399,6 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $this->symfonyHttpClientAkeneoApi->getCategories($sku);
     }
 
-
-
     public function testGetProductWillThrowExceptionWithNotFound(): void
     {
         $sku = 'AN12345';
