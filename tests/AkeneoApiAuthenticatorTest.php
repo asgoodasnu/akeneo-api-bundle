@@ -189,7 +189,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
         $this->akeneoApiAuthenticator->getToken();
     }
 
-    public function testGetTokenWillThrowOtherException(): void
+    public function testGetTokenWillThrowTransportException(): void
     {
         $response = $this->createMock(ResponseInterface::class);
         $response->expects($this->once())
