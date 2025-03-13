@@ -40,7 +40,7 @@ class AkeneoApiAuthenticator
      */
     public function getToken(): Token
     {
-        if ($this->token && time() < $this->token->getExpiresOn()) {
+        if ($this->token && time() < $this->token->getExpiresAt()) {
             return $this->token;
         }
 
@@ -78,7 +78,7 @@ class AkeneoApiAuthenticator
      */
     private function getBody(): string
     {
-        if ($this->token && time() >= $this->token->getExpiresOn()) {
+        if ($this->token && time() >= $this->token->getExpiresAt()) {
             return json_encode([
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $this->token->getRefreshToken(),

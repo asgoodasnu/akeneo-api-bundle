@@ -98,7 +98,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
 
         $this->assertInstanceOf(Token::class, $token);
         $this->assertEquals('access_token', $token->getAccessToken());
-        $this->assertEquals(time() + 3600, $token->getExpiresOn());
+        $this->assertEquals(time() + 3600, $token->getExpiresAt());
 
         // Check that second iteration outputs the same token
         $token = $this->akeneoApiAuthenticator->getToken();
@@ -163,7 +163,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
 
         $this->assertInstanceOf(Token::class, $token);
         $this->assertEquals('access_token', $token->getAccessToken());
-        $this->assertEquals(time() + 3600, $token->getExpiresOn());
+        $this->assertEquals(time() + 3600, $token->getExpiresAt());
     }
 
     public function testGetTokenWillThrowClientException(): void

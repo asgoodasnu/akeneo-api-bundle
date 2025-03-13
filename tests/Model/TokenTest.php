@@ -20,7 +20,7 @@ class TokenTest extends TestCase
         );
 
         self::assertSame('accessToken', $token->getAccessToken());
-        self::assertSame(123456, $token->getExpiresOn());
+        self::assertSame(123456, $token->getExpiresAt());
         self::assertSame('tokenType', $token->getTokenType());
         self::assertSame('scope', $token->getScope());
         self::assertSame('refreshToken', $token->getRefreshToken());

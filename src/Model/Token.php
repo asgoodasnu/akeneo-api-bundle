@@ -8,7 +8,7 @@ class Token
 {
     public function __construct(
         private string $accessToken,
-        private int $expiresOn,
+        private int $expiresAt,
         private string $tokenType,
         private string $scope,
         private string $refreshToken,
@@ -20,9 +20,9 @@ class Token
         return $this->accessToken;
     }
 
-    public function getExpiresOn(): int
+    public function getExpiresAt(): int
     {
-        return $this->expiresOn;
+        return $this->expiresAt;
     }
 
     public function getTokenType(): string
