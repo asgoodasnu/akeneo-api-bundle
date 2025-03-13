@@ -128,7 +128,7 @@ class SymfonyHttpClientAkeneoApi implements AkeneoApi
      */
     private function getDefaultHeaders(): array
     {
-        $this->token = $this->token ?? $this->akeneoApiAuthenticator->getToken();
+        $this->token = $this->akeneoApiAuthenticator->getToken()->getAccessToken();
 
         return [
             'headers' => [
