@@ -73,22 +73,28 @@ class AkeneoApiAuthenticator
         return \sprintf('%s%s', $this->baseUrl, $endpoint);
     }
 
+    /**
+     * @throws \JsonException
+     */
     private function getBody(): string
     {
         if ($this->token && time() >= $this->token->getExpiresOn()) {
             return json_encode([
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $this->token->getRefreshToken(),
-            ]);
+            ], JSON_THROW_ON_ERROR);
         } else {
             return json_encode([
                 'grant_type' => 'password',
                 'username' => $this->apiUser,
                 'password' => $this->apiPassword,
-            ]);
+            ], JSON_THROW_ON_ERROR);
         }
     }
 
+    /**
+     * @param array<string,mixed> $tokenData
+     */
     private function createToken(array $tokenData, int $time): Token
     {
         return new Token(
