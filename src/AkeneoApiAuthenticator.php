@@ -99,7 +99,7 @@ class AkeneoApiAuthenticator
     {
         return new Token(
             $tokenData['access_token'],
-            $time + $tokenData['expires_in'], // TODO: calculate expiry before sending
+            $time + $tokenData['expires_in'],
             $tokenData['token_type'],
             $tokenData['scope'],
             $tokenData['refresh_token'],
