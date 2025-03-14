@@ -15,8 +15,8 @@ class TokenTest extends TestCase
             'accessToken',
             123456,
             'tokenType',
-            'scope',
-            'refreshToken'
+            'refreshToken',
+            'scope'
         );
 
         self::assertSame('accessToken', $token->getAccessToken());

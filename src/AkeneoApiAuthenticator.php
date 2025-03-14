@@ -101,8 +101,8 @@ class AkeneoApiAuthenticator
             $tokenData['access_token'],
             $time + $tokenData['expires_in'],
             $tokenData['token_type'],
-            $tokenData['scope'],
             $tokenData['refresh_token'],
+            $tokenData['scope']
         );
     }
 }
