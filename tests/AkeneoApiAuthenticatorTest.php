@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Asgoodasnew\AkeneoApiBundle\Tests;
 
 use Asgoodasnew\AkeneoApiBundle\AkeneoApiAuthenticator;
-use Asgoodasnew\AkeneoApiBundle\AkeneoApiAuthorizationFailedException;
 use Asgoodasnew\AkeneoApiBundle\AkeneoApiException;
+use Asgoodasnew\AkeneoApiBundle\Model\Token;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\Exception\ClientException;
-use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -19,34 +19,34 @@ class AkeneoApiAuthenticatorTest extends TestCase
     /**
      * @var AkeneoApiAuthenticator
      */
-    protected $akeneoApiAuthenticator;
+    private $akeneoApiAuthenticator;
 
     /**
      * @var string
      */
-    protected $baseUrl;
+    private $baseUrl;
 
     /**
      * @var string
      */
-    protected $apiUser;
+    private $apiUser;
 
     /**
      * @var string
      */
-    protected $apiPassword;
+    private $apiPassword;
 
     /**
      * @var string
      */
-    protected $authToken;
+    private $authToken;
 
     /**
      * @var MockObject
      */
-    protected $client;
+    private $client;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         $this->baseUrl = 'http://url';
         $this->apiUser = 'user';
@@ -65,64 +65,144 @@ class AkeneoApiAuthenticatorTest extends TestCase
 
     public function testGetToken(): void
     {
-        $response = $this->createMock(ResponseInterface::class);
-
-        $this->client
+        $responseMock = $this->createMock(ResponseInterface::class);
+        $responseMock
             ->expects($this->once())
+            ->method('toArray')
+            ->willReturn(
+                [
+                    'access_token' => 'access_token',
+                    'expires_in' => 3600,
+                    'token_type' => 'token_type',
+                    'scope' => 'scope',
+                    'refresh_token' => 'refresh_token',
+                ]
+            );
+
+        $this->client->expects($this->once())
             ->method('request')
-            ->with('POST', 'http://url/api/oauth/v1/token', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Basic token',
-                ],
-                'body' => '{"grant_type":"password","username":"user","password":"password"}',
-            ])
-            ->willReturn($response);
+            ->with(
+                'POST',
+                'http://url/api/oauth/v1/token',
+                [
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => 'Basic token',
+                    ],
+                    'body' => '{"grant_type":"password","username":"user","password":"password"}',
+                ]
+            )
+            ->willReturn($responseMock);
 
-        $response
-            ->method('getContent')
-            ->willReturn('{"access_token": "xyz"}');
+        $token = $this->akeneoApiAuthenticator->getToken();
 
-        $this->assertSame('xyz', $this->akeneoApiAuthenticator->getToken());
+        $this->assertInstanceOf(Token::class, $token);
+        $this->assertEquals('access_token', $token->getAccessToken());
+        $this->assertEquals(time() + 3600, $token->getExpiresAt());
 
-        // check that getToken in second call is taken from stored value
-        $this->assertSame('xyz', $this->akeneoApiAuthenticator->getToken());
+        // Check that second iteration outputs the same token
+        $token = $this->akeneoApiAuthenticator->getToken();
+
+        $this->assertEquals('access_token', $token->getAccessToken());
     }
 
-    public function testGetTokenClientException(): void
+    public function testGetTokenWithExpiredToken(): void
     {
-        $this->client
-            ->expects($this->once())
-            ->method('request')
-            ->with('POST', 'http://url/api/oauth/v1/token', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Basic token',
+        $responseMock = $this->createMock(ResponseInterface::class);
+        $responseMock
+            ->expects($this->exactly(2))
+            ->method('toArray')
+            ->willReturn(
+                [
+                    'access_token' => 'access_token',
+                    'expires_in' => -1, // In production this would be the time() function that is smaller than the expiry time
+                    'token_type' => 'token_type',
+                    'scope' => 'scope',
+                    'refresh_token' => 'refresh_token',
                 ],
-                'body' => '{"grant_type":"password","username":"user","password":"password"}',
-            ])
-            ->willThrowException(new ClientException(new MockResponse()));
+                [
+                    'access_token' => 'access_token',
+                    'expires_in' => 3600,
+                    'token_type' => 'token_type',
+                    'scope' => 'scope',
+                    'refresh_token' => 'refresh_token',
+                ]
+            );
 
-        self::expectException(AkeneoApiAuthorizationFailedException::class);
+        $this->client
+            ->expects($this->exactly(2))
+            ->method('request')
+            ->withConsecutive(
+                [
+                    'POST',
+                    'http://url/api/oauth/v1/token',
+                    [
+                        'headers' => [
+                            'Content-Type' => 'application/json',
+                            'Authorization' => 'Basic token',
+                        ],
+                        'body' => '{"grant_type":"password","username":"user","password":"password"}',
+                    ],
+                ],
+                [
+                    'POST',
+                    'http://url/api/oauth/v1/token',
+                    [
+                        'headers' => [
+                            'Content-Type' => 'application/json',
+                            'Authorization' => 'Basic token',
+                        ],
+                        'body' => '{"grant_type":"refresh_token","refresh_token":"refresh_token"}',
+                    ],
+                ]
+            )->willReturn($responseMock, $responseMock);
+
+        $this->akeneoApiAuthenticator->getToken();
+
+        $token = $this->akeneoApiAuthenticator->getToken();
+
+        $this->assertInstanceOf(Token::class, $token);
+        $this->assertEquals('access_token', $token->getAccessToken());
+        $this->assertEquals(time() + 3600, $token->getExpiresAt());
+    }
+
+    public function testGetTokenWillThrowClientException(): void
+    {
+        $response = $this->createMock(ResponseInterface::class);
+        $response
+            ->expects($this->exactly(3))
+            ->method('getInfo')
+            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
+            ->willReturn(404, 'http://api/oauth/v1/token', []);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new ClientException($response));
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
 
         $this->akeneoApiAuthenticator->getToken();
     }
 
-    public function testGetTokenException(): void
+    public function testGetTokenWillThrowTransportException(): void
     {
-        $this->client
-            ->expects($this->once())
-            ->method('request')
-            ->with('POST', 'http://url/api/oauth/v1/token', [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Basic token',
-                ],
-                'body' => '{"grant_type":"password","username":"user","password":"password"}',
-            ])
-            ->willThrowException(new \Exception());
+        $response = $this->createMock(ResponseInterface::class);
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new TransportException('Transport exception'));
 
-        self::expectException(AkeneoApiException::class);
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->expectExceptionMessage('Transport exception');
 
         $this->akeneoApiAuthenticator->getToken();
     }

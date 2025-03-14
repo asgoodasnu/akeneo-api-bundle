@@ -9,11 +9,12 @@ use Asgoodasnew\AkeneoApiBundle\AkeneoApiException;
 use Asgoodasnew\AkeneoApiBundle\AkeneoApiProductNotFoundException;
 use Asgoodasnew\AkeneoApiBundle\CategoryTreeBuilder;
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
+use Asgoodasnew\AkeneoApiBundle\Model\Token;
 use Asgoodasnew\AkeneoApiBundle\SymfonyHttpClientAkeneoApi;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\Exception\ClientException;
-use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -51,7 +52,13 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     {
         $sku = 'AN12345';
 
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $response = $this->createMock(ResponseInterface::class);
 
@@ -72,8 +79,8 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->willReturn($response);
 
         $response->expects($this->once())
-            ->method('getContent')
-            ->willReturn('{"foo": "bar"}');
+            ->method('toArray')
+            ->willReturn(['foo' => 'bar']);
 
         $productArray = ['foo' => 'bar'];
 
@@ -81,18 +88,20 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     }
 
     /**
-     * @param class-string<\Exception> $thrownException
-     *
-     * @dataProvider dataProviderExceptions
-     *
      * @throws AkeneoApiProductNotFoundException
      * @throws AkeneoApiException
      */
-    public function testGetProductExceptions(\Exception $exception, $thrownException): void
+    public function testGetProductExceptions(): void
     {
         $sku = 'AN12345';
 
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $this->akeneoApiAuthenticator
             ->expects($this->once())
@@ -108,22 +117,11 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     'Authorization' => 'Bearer token',
                 ],
             ])
-            ->willThrowException($exception);
+            ->willThrowException(new TransportException());
 
-        $this->expectException($thrownException);
+        $this->expectException(AkeneoApiException::class);
 
         $this->symfonyHttpClientAkeneoApi->getProduct($sku);
-    }
-
-    /**
-     * @return array<mixed>
-     */
-    public function dataProviderExceptions(): array
-    {
-        return [
-            [new ClientException(new MockResponse()), AkeneoApiProductNotFoundException::class],
-            [new \Exception(), AkeneoApiException::class],
-        ];
     }
 
     /**
@@ -131,7 +129,13 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
      */
     public function testGetCategories(): void
     {
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $this->akeneoApiAuthenticator
             ->expects($this->once())
@@ -152,7 +156,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->willReturn($response);
 
         $response->expects($this->once())
-            ->method('getContent')
+            ->method('toArray')
             ->willReturn($this->getCategoriesResponseJson());
 
         $expectedItem = (new CategoryItem('master', 'Asgoodasnew'))
@@ -168,7 +172,13 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
      */
     public function testGetCategoriesException(): void
     {
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $this->akeneoApiAuthenticator
             ->expects($this->once())
@@ -184,7 +194,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     'Authorization' => 'Bearer token',
                 ],
             ])
-            ->willThrowException(new \Exception());
+            ->willThrowException(new TransportException());
 
         self::expectException(AkeneoApiException::class);
 
@@ -198,12 +208,18 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     {
         $message = 'message';
         $sku = 'AN12345';
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $response = $this->createMock(ResponseInterface::class);
 
         $this->akeneoApiAuthenticator
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('getToken')
             ->willReturn($token);
 
@@ -221,9 +237,9 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             )
             ->willReturn($response);
 
-        $response->expects(self::exactly(2))
-            ->method('getContent')
-            ->willReturn('{"foo": "bar"}');
+        $response->expects(self::exactly(1))
+            ->method('toArray')
+            ->willReturn(['foo' => 'bar']);
 
         $this->symfonyHttpClientAkeneoApi->triggerUpdate($sku, $message);
     }
@@ -235,7 +251,13 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     {
         $message = 'message';
         $sku = 'AN12345';
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $this->akeneoApiAuthenticator
             ->expects($this->once())
@@ -253,9 +275,9 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
                     ],
                 ]
             )
-            ->willThrowException(new ClientException(new MockResponse()));
+            ->willThrowException(new \Exception());
 
-        self::expectException(AkeneoApiProductNotFoundException::class);
+        self::expectException(AkeneoApiException::class);
 
         $this->symfonyHttpClientAkeneoApi->triggerUpdate($sku, $message);
     }
@@ -267,7 +289,13 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     {
         $message = 'message';
         $sku = 'AN12345';
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $this->akeneoApiAuthenticator
             ->expects($this->once())
@@ -299,18 +327,24 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
     {
         $message = 'message';
         $sku = 'AN12345';
-        $token = 'token';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
 
         $response = $this->createMock(ResponseInterface::class);
 
         $this->akeneoApiAuthenticator
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('getToken')
             ->willReturn($token);
 
         $response->expects($this->once())
-            ->method('getContent')
-            ->willReturn('{"foo": "bar"}');
+            ->method('toArray')
+            ->willReturn(['foo' => 'bar']);
 
         $matcher = self::exactly(2);
         $this->client
@@ -329,30 +363,237 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $this->symfonyHttpClientAkeneoApi->triggerUpdate($sku, $message);
     }
 
-    private function getCategoriesResponseJson(): string
+    public function testGetCategoriesWillThrowExceptionWithNotFound(): void
     {
-        return <<<EOT
-{
-  "current_page": 1,
-  "_embedded": {
-    "items": [
-      {
-        "code": "master",
-        "parent": null,
-        "labels": {
-          "de_DE": "Asgoodasnew"
-        }
-      },
-      {
-        "code": "tablets",
-        "parent": "master",
-        "labels": {
-          "de_DE": "Tablets"
-        }
-      }
-    ]
-  }
-}
-EOT;
+        $sku = 'AN12345';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
+
+        $this->akeneoApiAuthenticator
+            ->expects($this->once())
+            ->method('getToken')
+            ->willReturn($token);
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response
+            ->expects($this->exactly(3))
+            ->method('getInfo')
+            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
+            ->willReturn(404, 'http://url/api/rest/v1/categories?limit=100', []);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new ClientException($response));
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->symfonyHttpClientAkeneoApi->getCategories($sku);
+    }
+
+    public function testGetCategoriesWillThrowExceptionWithServerError(): void
+    {
+        $sku = 'AN12345';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
+
+        $this->akeneoApiAuthenticator
+            ->expects($this->once())
+            ->method('getToken')
+            ->willReturn($token);
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response
+            ->expects($this->exactly(3))
+            ->method('getInfo')
+            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
+            ->willReturn(500, 'http://url/api/rest/v1/categories?limit=100', []);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new ClientException($response));
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->symfonyHttpClientAkeneoApi->getCategories($sku);
+    }
+
+    public function testGetCategoriesWillThrow(): void
+    {
+        $sku = 'AN12345';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
+
+        $this->akeneoApiAuthenticator
+            ->expects($this->once())
+            ->method('getToken')
+            ->willReturn($token);
+
+        $response = $this->createMock(ResponseInterface::class);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new TransportException());
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->symfonyHttpClientAkeneoApi->getCategories($sku);
+    }
+
+    public function testGetProductWillThrowExceptionWithNotFound(): void
+    {
+        $sku = 'AN12345';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
+
+        $this->akeneoApiAuthenticator
+            ->expects($this->once())
+            ->method('getToken')
+            ->willReturn($token);
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response
+            ->expects($this->exactly(3))
+            ->method('getInfo')
+            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
+            ->willReturn(404, 'http://url/api/rest/v1/categories?limit=100', []);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new ClientException($response));
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->symfonyHttpClientAkeneoApi->getProduct($sku);
+    }
+
+    public function testGetProductWillThrowExceptionWithServerError(): void
+    {
+        $sku = 'AN12345';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
+
+        $this->akeneoApiAuthenticator
+            ->expects($this->once())
+            ->method('getToken')
+            ->willReturn($token);
+
+        $response = $this->createMock(ResponseInterface::class);
+        $response
+            ->expects($this->exactly(3))
+            ->method('getInfo')
+            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
+            ->willReturn(500, 'http://url/api/rest/v1/categories?limit=100', []);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new ClientException($response));
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->symfonyHttpClientAkeneoApi->getProduct($sku);
+    }
+
+    public function testGetProductWillThrow(): void
+    {
+        $sku = 'AN12345';
+        $token = new Token(
+            'token',
+            3600,
+            'token_type',
+            'scope',
+            'refresh_token'
+        );
+
+        $this->akeneoApiAuthenticator
+            ->expects($this->once())
+            ->method('getToken')
+            ->willReturn($token);
+
+        $response = $this->createMock(ResponseInterface::class);
+
+        $response->expects($this->once())
+            ->method('toArray')
+            ->willThrowException(new TransportException());
+
+        $this->client
+            ->expects($this->exactly(1))
+            ->method('request')
+            ->willReturn($response);
+
+        $this->expectException(AkeneoApiException::class);
+        $this->symfonyHttpClientAkeneoApi->getProduct($sku);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getCategoriesResponseJson(): array
+    {
+        return [
+            'current_page' => 1,
+            '_embedded' => [
+                'items' => [
+                    [
+                        'code' => 'master',
+                        'parent' => null,
+                        'labels' => [
+                            'de_DE' => 'Asgoodasnew',
+                        ],
+                    ],
+                    [
+                        'code' => 'tablets',
+                        'parent' => 'master',
+                        'labels' => [
+                            'de_DE' => 'Tablets',
+                        ],
+                    ],
+                ],
+            ],
+        ];
     }
 }
