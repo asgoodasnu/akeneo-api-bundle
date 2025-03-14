@@ -25,12 +25,12 @@ class Token
         return $this->expiresAt;
     }
 
-    public function getTokenType(): ?string
+    public function getTokenType(): string
     {
         return $this->tokenType;
     }
 
-    public function getScope(): string
+    public function getScope(): ?string
     {
         return $this->scope;
     }
