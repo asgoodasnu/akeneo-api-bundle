@@ -117,15 +117,15 @@ class AkeneoApiAuthenticatorTest extends TestCase
                     'access_token' => 'access_token',
                     'expires_in' => -1, // In production this would be the time() function that is smaller than the expiry time
                     'token_type' => 'token_type',
-                    'scope' => 'scope',
                     'refresh_token' => 'refresh_token',
+                    'scope' => 'scope',
                 ],
                 [
                     'access_token' => 'access_token',
                     'expires_in' => 3600,
                     'token_type' => 'token_type',
-                    'scope' => 'scope',
                     'refresh_token' => 'refresh_token',
+                    'scope' => 'scope',
                 ]
             );
 
