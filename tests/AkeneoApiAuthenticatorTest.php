@@ -74,8 +74,8 @@ class AkeneoApiAuthenticatorTest extends TestCase
                     'access_token' => 'access_token',
                     'expires_in' => 3600,
                     'token_type' => 'token_type',
-                    'scope' => 'scope',
                     'refresh_token' => 'refresh_token',
+                    'scope' => 'scope',
                 ]
             );
 
@@ -106,6 +106,50 @@ class AkeneoApiAuthenticatorTest extends TestCase
         $this->assertEquals('access_token', $token->getAccessToken());
     }
 
+    public function testGetTokenWithNullScope(): void
+    {
+        $responseMock = $this->createMock(ResponseInterface::class);
+        $responseMock
+            ->expects($this->once())
+            ->method('toArray')
+            ->willReturn(
+                [
+                    'access_token' => 'access_token',
+                    'expires_in' => 3600,
+                    'token_type' => 'token_type',
+                    'refresh_token' => 'refresh_token',
+                    'scope' => null,
+                ]
+            );
+
+        $this->client->expects($this->once())
+            ->method('request')
+            ->with(
+                'POST',
+                'http://url/api/oauth/v1/token',
+                [
+                    'headers' => [
+                        'Content-Type' => 'application/json',
+                        'Authorization' => 'Basic token',
+                    ],
+                    'body' => '{"grant_type":"password","username":"user","password":"password"}',
+                ]
+            )
+            ->willReturn($responseMock);
+
+        $token = $this->akeneoApiAuthenticator->getToken();
+
+        $this->assertInstanceOf(Token::class, $token);
+        $this->assertEquals('access_token', $token->getAccessToken());
+        $this->assertEquals(time() + 3600, $token->getExpiresAt());
+        $this->assertNull($token->getScope());
+
+        // Check that second iteration outputs the same token
+        $token = $this->akeneoApiAuthenticator->getToken();
+
+        $this->assertEquals('access_token', $token->getAccessToken());
+    }
+
     public function testGetTokenWithExpiredToken(): void
     {
         $responseMock = $this->createMock(ResponseInterface::class);
@@ -117,15 +161,15 @@ class AkeneoApiAuthenticatorTest extends TestCase
                     'access_token' => 'access_token',
                     'expires_in' => -1, // In production this would be the time() function that is smaller than the expiry time
                     'token_type' => 'token_type',
-                    'scope' => 'scope',
                     'refresh_token' => 'refresh_token',
+                    'scope' => 'scope',
                 ],
                 [
                     'access_token' => 'access_token',
                     'expires_in' => 3600,
                     'token_type' => 'token_type',
-                    'scope' => 'scope',
                     'refresh_token' => 'refresh_token',
+                    'scope' => 'scope',
                 ]
             );
 

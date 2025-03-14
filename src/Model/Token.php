@@ -10,8 +10,8 @@ class Token
         private string $accessToken,
         private int $expiresAt,
         private string $tokenType,
-        private string $scope,
         private string $refreshToken,
+        private ?string $scope = null,
     ) {
     }
 
@@ -30,7 +30,7 @@ class Token
         return $this->tokenType;
     }
 
-    public function getScope(): string
+    public function getScope(): ?string
     {
         return $this->scope;
     }
