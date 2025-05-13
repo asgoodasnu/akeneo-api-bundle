@@ -11,11 +11,11 @@
     "require": {
         "php": ">=8.2",
         "ext-json": "*",
-        "symfony/config": "^7.1|^6.2",
-        "symfony/dependency-injection": "^7.1|^6.2",
-        "symfony/http-kernel": "^7.1|^6.2",
-        "symfony/cache": "^7.1|^6.2",
-        "symfony/http-client": "^7.1|^6.2"
+        "symfony/config": "^7.1||^6.2",
+        "symfony/dependency-injection": "^7.1||^6.2",
+        "symfony/http-kernel": "^7.1||^6.2",
+        "symfony/cache": "^7.1||^6.2",
+        "symfony/http-client": "^7.1||^6.2"
     },
     "autoload": {
         "psr-4": {
