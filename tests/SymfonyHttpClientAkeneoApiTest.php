@@ -386,7 +386,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->willReturnMap([
                 ['http_code', 404],
                 ['url', 'http://url/api/rest/v1/categories?limit=100'],
-                ['response_headers', []]
+                ['response_headers', []],
             ]);
 
         $response->expects($this->once())
@@ -425,7 +425,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->willReturnMap([
                 ['http_code', 500],
                 ['url', 'http://url/api/rest/v1/categories?limit=100'],
-                ['response_headers', []]
+                ['response_headers', []],
             ]);
 
         $response->expects($this->once())
@@ -495,7 +495,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->willReturnMap([
                 ['http_code', 404],
                 ['url', 'http://url/api/rest/v1/categories?limit=100'],
-                ['response_headers', []]
+                ['response_headers', []],
             ]);
 
         $response->expects($this->once())
@@ -532,10 +532,10 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->expects($this->exactly(3))
             ->method('getInfo')
             ->willReturnMap([
-                    ['http_code', 500],
-                    ['url', 'http://url/api/rest/v1/categories?limit=100'],
-                    ['response_headers', []]
-                ]);
+                ['http_code', 500],
+                ['url', 'http://url/api/rest/v1/categories?limit=100'],
+                ['response_headers', []],
+            ]);
 
         $response->expects($this->once())
             ->method('toArray')

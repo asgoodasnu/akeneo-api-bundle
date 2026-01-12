@@ -187,7 +187,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
                         ],
                         'body' => '{"grant_type":"password","username":"user","password":"password"}',
                     ],
-                    $responseMock
+                    $responseMock,
                 ],
                 [
                     'POST',
@@ -199,8 +199,8 @@ class AkeneoApiAuthenticatorTest extends TestCase
                         ],
                         'body' => '{"grant_type":"refresh_token","refresh_token":"refresh_token"}',
                     ],
-                    $responseMock
-                ]
+                    $responseMock,
+                ],
             ]);
 
         $this->akeneoApiAuthenticator->getToken();
@@ -221,7 +221,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
             ->willReturnMap([
                 ['http_code', 404],
                 ['url', 'http://api/oauth/v1/token'],
-                ['response_headers', []]
+                ['response_headers', []],
             ]);
 
         $response->expects($this->once())
