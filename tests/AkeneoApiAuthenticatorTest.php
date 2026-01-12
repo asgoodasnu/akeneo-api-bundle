@@ -176,7 +176,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
         $this->client
             ->expects($this->exactly(2))
             ->method('request')
-            ->withConsecutive(
+            ->willReturnMap([
                 [
                     'POST',
                     'http://url/api/oauth/v1/token',
@@ -187,6 +187,7 @@ class AkeneoApiAuthenticatorTest extends TestCase
                         ],
                         'body' => '{"grant_type":"password","username":"user","password":"password"}',
                     ],
+                    $responseMock
                 ],
                 [
                     'POST',
@@ -198,8 +199,9 @@ class AkeneoApiAuthenticatorTest extends TestCase
                         ],
                         'body' => '{"grant_type":"refresh_token","refresh_token":"refresh_token"}',
                     ],
+                    $responseMock
                 ]
-            )->willReturn($responseMock, $responseMock);
+            ]);
 
         $this->akeneoApiAuthenticator->getToken();
 
@@ -216,8 +218,11 @@ class AkeneoApiAuthenticatorTest extends TestCase
         $response
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturn(404, 'http://api/oauth/v1/token', []);
+            ->willReturnMap([
+                ['http_code', 404],
+                ['url', 'http://api/oauth/v1/token'],
+                ['response_headers', []]
+            ]);
 
         $response->expects($this->once())
             ->method('toArray')
