@@ -351,7 +351,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->expects($matcher)
             ->method('request')
             ->willReturnCallback(function () use ($matcher, $response) {
-                if (1 === $matcher->getInvocationCount()) {
+                if (1 === $matcher->numberOfInvocations()) {
                     return $response;
                 }
 
