@@ -223,19 +223,25 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->method('getToken')
             ->willReturn($token);
 
+        $invokedCount = $this->exactly(2);
+
         $this->client
-            ->expects($this->exactly(2))
+            ->expects($invokedCount)
             ->method('request')
-            ->withConsecutive(
-                ['GET', 'http://url/api/rest/v1/products/AN12345', [
-                    'headers' => [
-                        'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer token',
-                    ],
-                ]],
-                ['PATCH', 'http://url/api/rest/v1/products/AN12345', self::anything()]
-            )
-            ->willReturn($response);
+            ->willReturnCallback(function ($method, $url, $options) use ($invokedCount, $response) {
+                if (1 === $invokedCount->numberOfInvocations()) {
+                    $this->assertEquals('GET', $method);
+                    $this->assertEquals('http://url/api/rest/v1/products/AN12345', $url);
+                    $this->assertEquals(['headers' => ['Content-Type' => 'application/json', 'Authorization' => 'Bearer token']], $options);
+                }
+
+                if (2 === $invokedCount->numberOfInvocations()) {
+                    $this->assertEquals('PATCH', $method);
+                    $this->assertEquals('http://url/api/rest/v1/products/AN12345', $url);
+                }
+
+                return $response;
+            });
 
         $response->expects(self::exactly(1))
             ->method('toArray')
@@ -351,7 +357,7 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
             ->expects($matcher)
             ->method('request')
             ->willReturnCallback(function () use ($matcher, $response) {
-                if (1 === $matcher->getInvocationCount()) {
+                if (1 === $matcher->numberOfInvocations()) {
                     return $response;
                 }
 
@@ -383,8 +389,11 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $response
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturn(404, 'http://url/api/rest/v1/categories?limit=100', []);
+            ->willReturnMap([
+                ['http_code', 404],
+                ['url', 'http://url/api/rest/v1/categories?limit=100'],
+                ['response_headers', []],
+            ]);
 
         $response->expects($this->once())
             ->method('toArray')
@@ -419,8 +428,11 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $response
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturn(500, 'http://url/api/rest/v1/categories?limit=100', []);
+            ->willReturnMap([
+                ['http_code', 500],
+                ['url', 'http://url/api/rest/v1/categories?limit=100'],
+                ['response_headers', []],
+            ]);
 
         $response->expects($this->once())
             ->method('toArray')
@@ -486,8 +498,11 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $response
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturn(404, 'http://url/api/rest/v1/categories?limit=100', []);
+            ->willReturnMap([
+                ['http_code', 404],
+                ['url', 'http://url/api/rest/v1/categories?limit=100'],
+                ['response_headers', []],
+            ]);
 
         $response->expects($this->once())
             ->method('toArray')
@@ -522,8 +537,11 @@ class SymfonyHttpClientAkeneoApiTest extends TestCase
         $response
             ->expects($this->exactly(3))
             ->method('getInfo')
-            ->withConsecutive(['http_code'], ['url'], ['response_headers'])
-            ->willReturn(500, 'http://url/api/rest/v1/categories?limit=100', []);
+            ->willReturnMap([
+                ['http_code', 500],
+                ['url', 'http://url/api/rest/v1/categories?limit=100'],
+                ['response_headers', []],
+            ]);
 
         $response->expects($this->once())
             ->method('toArray')
