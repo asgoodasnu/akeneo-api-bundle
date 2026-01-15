@@ -9,7 +9,9 @@ use Asgoodasnew\AkeneoApiBundle\AkeneoApiException;
 use Asgoodasnew\AkeneoApiBundle\AkeneoApiProductNotFoundException;
 use Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi;
 use Asgoodasnew\AkeneoApiBundle\Model\CategoryItem;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
@@ -29,7 +31,7 @@ class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
     /** @var MockObject */
     private $cacheItem;
 
-    /** @var MockObject */
+    /** @var Stub|LoggerInterface */
     protected $logger;
 
     protected function setUp(): void
@@ -37,7 +39,7 @@ class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
         $this->decorated = $this->createMock(AkeneoApi::class);
         $this->cache = $this->createMock(CacheItemPoolInterface::class);
         $this->cacheItem = $this->createMock(CacheItemInterface::class);
-        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->logger = $this->createStub(LoggerInterface::class);
 
         $this->cachedSymfonyHttpClientAkeneoApi = new CachedSymfonyHttpClientAkeneoApi($this->decorated, $this->cache);
     }
@@ -117,6 +119,7 @@ class CachedSymfonyHttpClientAkeneoApiTest extends TestCase
     /**
      * @throws AkeneoApiException
      */
+    #[AllowMockObjectsWithoutExpectations]
     public function testTriggerUpdate(): void
     {
         $this->decorated

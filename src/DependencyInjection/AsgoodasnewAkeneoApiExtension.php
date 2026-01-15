@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Asgoodasnew\AkeneoApiBundle\DependencyInjection;
 
 use Asgoodasnew\AkeneoApiBundle\CachedSymfonyHttpClientAkeneoApi;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -55,6 +56,7 @@ class AsgoodasnewAkeneoApiExtension extends Extension
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
+        /** @phpstan-var ConfigurationInterface $configuration */
         $configuration = $this->getConfiguration($configs, $container);
         $config = $this->processConfiguration($configuration, $configs);
 
