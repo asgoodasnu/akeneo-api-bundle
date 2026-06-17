@@ -83,13 +83,13 @@ class AkeneoApiAuthenticator
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $this->token->getRefreshToken(),
             ], JSON_THROW_ON_ERROR);
-        } else {
-            return json_encode([
-                'grant_type' => 'password',
-                'username' => $this->apiUser,
-                'password' => $this->apiPassword,
-            ], JSON_THROW_ON_ERROR);
         }
+
+        return json_encode([
+            'grant_type' => 'password',
+            'username' => $this->apiUser,
+            'password' => $this->apiPassword,
+        ], JSON_THROW_ON_ERROR);
     }
 
     /**
